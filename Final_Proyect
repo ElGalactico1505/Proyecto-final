@@ -1,0 +1,231 @@
+import discord
+import requests
+from discord.ext import commands   #importaciones
+import random
+
+intents = discord.Intents.default()
+intents.message_content = True
+
+bot = commands.Bot(command_prefix='$', intents=intents, help_command=None)
+
+#comandos
+
+@bot.event     #evento de inicio
+async def on_ready():
+    print(f'Hemos iniciado sesión como {bot.user} - ¡Bienvenido a {bot.user.name}!')
+
+@bot.event      #evento de error de comando
+async def on_command_error(ctx, error):
+    if isinstance(error, commands.CommandNotFound):
+        await ctx.send("¡Comando no encontrado! Usa `$ayuda` para ver la lista de comandos disponibles.")
+
+@bot.command()       #comando hola
+async def hola(ctx):
+    await ctx.send(f'Hola, soy un bot llamado {bot.user.name}!')
+
+@bot.command()      #comando animal
+async def animal(ctx):
+    animales = [            #Lista de animales
+        {
+            "emoji": "🐧",
+            "nombre": "Pingüino",
+            "dato": "Los pingüinos están en peligro debido al derretimiento del hielo marino en la Antártida.",
+            "poblacion": "Aproximadamente 12 millones de individuos en todo el mundo.",
+            "imagen": "https://upload.wikimedia.org/wikipedia/commons/f/fc/Manchot_royal_-_King_Penguin.jpg"
+        },
+        {
+            "emoji": "🦭",
+            "nombre": "Foca",
+            "dato": "Las focas se ven afectadas por el calentamiento del océano y la pérdida de hielo ártico.",
+            "poblacion": "Se estima que hay entre 30 y 40 millones de focas globalmente.",
+            "imagen": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/76/Seehund11cele4_edit.jpg/1280px-Seehund11cele4_edit.jpg"
+        },
+        {
+            "emoji": "🐘",
+            "nombre": "Elefante",
+            "dato": "Los elefantes sufren por la pérdida de su hábitat debido a la deforestación.",
+            "poblacion": "Quedan aproximadamente 415,000 elefantes en África y 40,000 en Asia.",
+            "imagen": "https://upload.wikimedia.org/wikipedia/commons/5/59/Serengeti_Elefantenbulle.jpg"
+        },
+        {
+            "emoji": "🦋",
+            "nombre": "Mariposa Monarca",
+            "dato": "La migración de la mariposa monarca ha disminuido por el cambio climático.",
+            "poblacion": "Actualmente, su población es de unos 100 millones, muy variable según el año.",
+            "imagen": "https://upload.wikimedia.org/wikipedia/commons/6/63/Monarch_In_May.jpg"
+        },
+        {
+            "emoji": "🐻‍❄️",
+            "nombre": "Oso Polar",
+            "dato": "El oso polar depende del hielo marino para cazar, pero este se está derritiendo rápidamente.",
+            "poblacion": "Se calcula que hay entre 22,000 y 31,000 osos polares en el mundo.",
+            "imagen": "https://upload.wikimedia.org/wikipedia/commons/0/09/Polar_Bear_-_Alaska.jpg"
+        },
+        {
+            "emoji": "🐢",
+            "nombre": "Tortuga Marina",
+            "dato": "Las tortugas marinas enfrentan riesgos por el aumento del nivel del mar y la contaminación.",
+            "poblacion": "Se estima que quedan entre 85,000 y 90,000 tortugas marinas adultas.",
+            "imagen": "https://upload.wikimedia.org/wikipedia/commons/7/71/GreenSeaTurtle-2.jpg"
+        },
+        {
+            "emoji": "🐬",
+            "nombre": "Delfín",
+            "dato": "El aumento de la temperatura del océano afecta la alimentación y migración de los delfines.",
+            "poblacion": "Existen aproximadamente 600,000 delfines mulares en el mundo.",
+            "imagen": "https://upload.wikimedia.org/wikipedia/commons/1/10/Tursiops_truncatus_01.jpg"
+        },
+        {
+            "emoji": "🦜",
+            "nombre": "Guacamayo",
+            "dato": "La destrucción de la selva pone en peligro a muchas especies de aves tropicales.",
+            "poblacion": "La cantidad exacta varía según la especie, pero muchas están en peligro debido a la deforestación.",
+            "imagen": "https://upload.wikimedia.org/wikipedia/commons/8/8a/Ara_macao_en_Zooaquarium_de_valencia%2C_Venezuela.jpg"
+        },
+    ]
+
+    animal = random.choice(animales)
+    # Agregar manejo de errores para la imagen
+    try:
+        embed = discord.Embed(       #embed
+            title=f"{animal['emoji']} {animal['nombre']}",
+            description=f"{animal['dato']}\n\n**Población aproximada:** {animal['poblacion']}",
+            color=0x2ecc71
+        )
+        embed.set_image(url=animal['imagen'])
+        await ctx.send(embed=embed)
+    except Exception as e:
+        await ctx.send(f"Error al mostrar la imagen: {str(e)}")
+        print(f"Error con la imagen de {animal['nombre']}: {str(e)}")
+
+
+@bot.command(aliases=["help"])        #alias para el comando ayuda
+async def ayuda(ctx):
+    """Muestra una lista de comandos disponibles y su descripción."""
+    mensaje = (
+        f"**Comandos Disponibles de {bot.user.name}:**\n"
+        "$hola - Saluda al bot.\n"
+        "$clima [ciudad] - Obtiene el clima actual de una ciudad.\n"
+        "$ayuda / $help - Muestra este mensaje de ayuda.\n"
+        "$masinfo - Muestra enlaces para obtener más información.\n"
+        "$inundaciones - Información sobre inundaciones relacionadas al cambio climático.\n"
+        "$tornados - Información sobre tornados extremos.\n"
+        "$sequias - Información sobre sequías prolongadas.\n"
+        "$catastrofes - Información sobre catástrofes climáticas.\n"
+        "$animal - Muestra un animal con dato ambiental y población.\n"
+        "$accion - Sugerencia de acción ecológica para el día.\n"
+        "$frase - Muestra una frase inspiradora sobre el medio ambiente."
+    )
+    await ctx.send(mensaje)
+
+@bot.command()
+async def masinfo(ctx):       #mas información
+    """Muestra enlaces para obtener más información sobre el cambio climático."""
+    mensaje = (
+        "**Más Información sobre el Cambio Climático:**\n"
+        "- Climate Crisis: Race We Can Win: https://www.un.org/es/un75/climate-crisis-race-we-can-win\n"
+        "- Causas y Efectos del Cambio Climático: https://www.un.org/es/climatechange/science/causes-effects-climate-change"
+    )
+    await ctx.send(mensaje)
+
+def get_weather(city: str) -> str:
+    try:
+        url = f"https://wttr.in/{city}?format=%C\n\nTemperatura: %t\nViento: %w\nHumedad: %h\nAmanecer: %S\nAtardecer: %s&lang=es"
+        response = requests.get(url, timeout=10)
+        if response.status_code == 200:
+            return response.text.strip()
+        else:
+            return "No se pudo obtener la información del clima. Intenta más tarde."
+    except requests.RequestException:
+        return "Error al obtener el clima. Verifica tu conexión o inténtalo más tarde."
+
+@bot.command()         #clima
+async def clima(ctx, *, city: str):
+    """Muestra el clima actual de una ciudad."""
+    weather_info = get_weather(city)
+    mensaje = f"**Clima en {city}:**\n{weather_info}"
+    await ctx.send(mensaje)
+
+@bot.command()         #inundaciones
+async def inundaciones(ctx):
+    """Muestra información sobre inundaciones relacionadas al cambio climático."""
+    descripcion = (
+        "**Inundaciones:**\n"
+        "Las inundaciones, provocadas por lluvias intensas y el aumento del nivel del mar, son un efecto evidente del cambio climático.\n"
+        "Fuente: https://www.un.org/es/climatechange/science/causes-effects-climate-change"
+    )
+    await ctx.send(descripcion)
+
+@bot.command()         #tornados
+async def tornados(ctx):
+    """Muestra información sobre tornados extremos."""
+    descripcion = (
+        "**Tornados:**\n"
+        "Los tornados pueden intensificarse y arrasar con aldeas, siendo un claro indicador de los extremos climáticos generados por el cambio climático.\n"
+        "Fuente: https://www.un.org/es/un75/climate-crisis-race-we-can-win"
+    )
+    await ctx.send(descripcion)
+
+@bot.command()       #sequias
+async def sequias(ctx):
+    """Muestra información sobre sequías prolongadas."""
+    descripcion = (
+        "**Sequías:**\n"
+        "Las sequías, o periodos prolongados de escasez de agua, se han vuelto más comunes y severas por el cambio climático.\n"
+        "Fuente: https://www.un.org/es/climatechange/science/causes-effects-climate-change"
+    )
+    await ctx.send(descripcion)
+
+@bot.command()     #catastrofes
+async def catastrofes(ctx):
+    """Muestra información sobre catástrofes climáticas."""
+    descripcion = (
+        "**Catástrofes Climáticas:**\n"
+        "El cambio climático puede desencadenar catástrofes como incendios forestales, tormentas extremas y huracanes que afectan a comunidades enteras.\n"
+        "Fuente: https://www.un.org/es/un75/climate-crisis-race-we-can-win"
+    )
+    await ctx.send(descripcion)
+
+@bot.command()     #acción ecológica
+async def accion(ctx):
+    """Sugiere una acción ecológica para ayudar al medio ambiente."""
+    acciones = [
+        "Hoy puedes ahorrar agua cerrando el grifo mientras te cepillas los dientes.",
+        "Recicla tu basura plástica para reducir la contaminación.",
+        "Apaga las luces que no estés usando para ahorrar energía.",
+        "Utiliza bolsas reutilizables cuando vayas de compras.",
+        "Camina o usa bicicleta para trayectos cortos en lugar del coche.",
+        "Planta una planta o árbol para ayudar a mejorar la calidad del aire.",
+        "Evita el uso de productos desechables de plástico.",
+        "Consume alimentos de producción local para reducir la huella de carbono.",
+        "Reduce el consumo de papel usando medios digitales cuando sea posible.",
+        "Usa el transporte público para disminuir la contaminación."
+    ]
+    sugerencia = random.choice(acciones)
+    await ctx.send(f"🌿 **Acción ecológica del día:** {sugerencia}")
+
+@bot.command()         #frase ecológica
+async def frase(ctx):
+    """Muestra una frase inspiradora o informativa sobre el cuidado del medio ambiente."""
+    frases = [
+        "La Tierra no es una herencia de nuestros padres, sino un préstamo de nuestros hijos.",
+        "Cada pequeño acto cuenta para salvar nuestro planeta.",
+        "No hay un planeta B. Cuida el que tienes.",
+        "El cambio climático es real y requiere acción inmediata.",
+        "Planta un árbol y estarás ayudando a toda la humanidad.",
+        "La naturaleza no es un lugar para visitar, es nuestro hogar.",
+        "La contaminación es el precio que pagamos por la indiferencia.",
+        "Cuida el agua, es la sangre de la Tierra.",
+        "El futuro de la humanidad depende de nuestras decisiones hoy.",
+        "Sé el cambio que quieres ver en el mundo, empezando por el medio ambiente."
+    ]
+    mensaje = random.choice(frases)
+    await ctx.send(f"🌎 **Frase ecológica:** {mensaje}")
+
+
+
+
+
+
+
+bot.run("TOKEN") #Token del bot
